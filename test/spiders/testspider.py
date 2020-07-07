@@ -19,7 +19,7 @@ class GoogleSpider(scrapy.Spider):
     }
 
     def parse(self, response):
-        # gets links of all search results on page 1 of google
+        # gets links of all search results on page 1
         searchresults = [re.search(r"q=([^;]*)&sa", i).group(1)
                          for i in response.css('div.kCrYT a::attr(href)').getall()
                          if i is not None]
@@ -42,9 +42,9 @@ class GoogleSpider(scrapy.Spider):
             }
 
     def parse_tripzaza(self, response):
-        content_div = "div.single-post-content.clearfixr"
-        titles = response.css(f'{content_div} h3::text').getall()
-        descrs = response.css(f'{content_div} p::text')[2::].getall()
+        content_div = "div.single-post-content"
+        titles = response.css(f'{content_div} h3 span::text').getall()
+        descrs = response.css(f'{content_div} p::text').getall()[4::]
         imgs = response.css(f'{content_div} img::attr(src)').getall()
         for i in range(len(titles)):
             yield {
