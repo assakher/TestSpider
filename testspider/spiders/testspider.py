@@ -1,11 +1,12 @@
 import scrapy
 import re
+from .cfg import SEARCH_ENGINE, QUERY
 
 
 class GoogleSpider(scrapy.Spider):
     name = 'test'
 
-    start_urls = [u"https://www.google.com/search?q=%D0%94%D0%BE%D1%81%D1%82%D0%BE%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%87%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D0%BE%D1%81%D1%82%D0%B8+%D0%A1%D0%B0%D0%BD%D0%BA%D1%82+%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3"]
+    start_urls = [SEARCH_ENGINE + QUERY]
 
     def parse(self, response):
         # gets links of all search results on page 1 of google
