@@ -1,12 +1,22 @@
 import scrapy
+from scrapy.crawler import  CrawlerProcess
 import re
-from .cfg import SEARCH_ENGINE, QUERY
+from cfg import SEARCH_ENGINE, QUERY
 
 
 class GoogleSpider(scrapy.Spider):
     name = 'test'
 
     start_urls = [SEARCH_ENGINE + QUERY]
+
+    custom_settings = {
+        'FEED_URI': 'test.json',
+        'FEED_FORMAT': 'json',
+        'FEED_EXPORTERS': {
+            'json': 'scrapy.exporters.JsonItemExporter',
+        },
+        'FEED_EXPORT_ENCODING': 'utf-8',
+    }
 
     def parse(self, response):
         # gets links of all search results on page 1 of google
@@ -45,10 +55,15 @@ class GoogleSpider(scrapy.Spider):
 
     def parse_allmyworld(self, response):
         titles = response.css('h2::text').getall()
-        imgs = response.css('p img::attr(src)').getall()
+        imgs = response.css('p img.alignnone::attr(data-lazy-src)').getall()
         for i in range(len(titles)):
             yield {
                 'title': titles[i],
-                'descr': response.xpath(f'//*[@id="post-35370"]/div[1]/h2[{i}]/following-sibling::p[1]/text()').get(),
+                'descr': response.xpath(f'///h2[{i+1}]/following-sibling::p/text()').get(),
                 'img': imgs[i]
             }
+
+
+process = CrawlerProcess()
+process.crawl(GoogleSpider)
+process.start()
