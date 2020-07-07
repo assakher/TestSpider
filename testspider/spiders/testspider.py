@@ -12,11 +12,15 @@ class GoogleSpider(scrapy.Spider):
         searchresults = [re.search(r"q=([^;]*)&sa", i).group(1)
                          for i in response.css('div.kCrYT a::attr(href)').getall()
                          if i is not None]
-        print(searchresults)
-        # Running custom parser for 3 chosen sites
-        yield scrapy.Request(searchresults[6], callback=self.parse_spbguide)
-        yield scrapy.Request(searchresults[8], callback=self.parse_tripzaza)
-        yield scrapy.Request(searchresults[9], callback=self.parse_allmyworld)
+        supported_sites = {
+            'https://www.spb-guide.ru/': self.parse_spbguide,
+            'https://www.tripzaza.com/ru/destinations/luchshie-dostoprimechatelnosti-sankt-peterburga/': self.parse_tripzaza,
+            'https://allmyworld.ru/dostoprimechatelnosti-sankt-peterburga/': self.parse_allmyworld
+        }
+
+        for result in searchresults:
+            if result in supported_sites:
+                yield scrapy.Request(result, callback=supported_sites[result])
 
     def parse_spbguide(self, response):
         for item in response.css('div.index23')[:-2]:
@@ -40,7 +44,7 @@ class GoogleSpider(scrapy.Spider):
 
     def parse_allmyworld(self, response):
         titles = response.css('h2::text').getall()
-        imgs = response.css('img,alignignore::attr(src)').getall()
+        imgs = response.css('p img::attr(src)').getall()
         for i in range(len(titles)):
             yield {
                 'title': titles[i],
